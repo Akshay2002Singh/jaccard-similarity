@@ -1,0 +1,48 @@
+{
+  "name": "jaccard-suggest",
+  "version": "1.0.0",
+  "description": "Fast Jaccard-similarity based auto-suggestion for JS/TS",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akshay2002Singh/jaccard-similarity.git"
+  },
+  "keywords": [
+    "jaccard",
+    "autosuggest",
+    "similarity",
+    "search",
+    "token"
+  ],
+  "author": "Akshay Singh",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  },
+  "bugs": {
+    "url": "https://github.com/Akshay2002Singh/jaccard-similarity/issues"
+  },
+  "homepage": "https://github.com/Akshay2002Singh/jaccard-similarity#readme",
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
