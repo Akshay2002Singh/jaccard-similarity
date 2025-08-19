@@ -10,6 +10,7 @@ Useful for **search**, **autocomplete**, **spell-check**, or **fuzzy matching** 
 - ⚡ Maintains an **inverted index** for efficient lookup.
 - 📝 Supports **add, remove, update** operations.
 - 🔧 Configurable **tokenizer, minScore, topK** results.
+- 🛑 Built-in English stopword list (customizable).
 - ✅ Fully typed (TypeScript).
 
 ---
@@ -68,6 +69,7 @@ new JaccardSuggester(data?: (string | T)[], options?: Options<T>)
 - data: initial items (strings or custom objects).
 - options:
     - tokenizer?: (s: string) => string[] → split text into tokens (default: lowercased words & numbers).
+    - stopWords?: Set<string> → stopwords to ignore (default: built-in English stopwords).
     - minScore?: number → minimum Jaccard similarity score (default: 0).
     - topK?: number → maximum number of results to return (default: 5).
 
@@ -101,19 +103,47 @@ export interface Options<T = Item> {
 }
 ```
 
+## 🛑 Stopwords
+
+Stopwords are common words (like the, is, in, at) that often don’t add meaning for search/suggestions.
+This library ships with a default English stopword list (defaultStopWords), which is used automatically.
+
+Example with Custom Stopwords
+
+```jsx
+import JaccardSuggester, { defaultStopWords } from "jaccard-suggest";
+
+const customStopWords = new Set([...defaultStopWords, "pie", "juice"]);
+
+const suggester = new JaccardSuggester(
+  ["apple pie", "apple juice", "apple tree"],
+  { stopWords: customStopWords }
+);
+
+console.log(suggester.suggest("apple"));
+// -> only matches "apple tree", because "pie" and "juice" are ignored
+```
+
+### Why Stopwords?
+
+1. Improves relevance by ignoring filler words.
+2. Reduces noise in similarity scoring.
+3. Keeps inverted index smaller.
+
 ## 🔬 How it Works
 
 1. Each item’s text is tokenized into words (e.g., "apple pie" → { "apple", "pie" }).
-2. An inverted index maps each token → items that contain it.
+2. Stopwords are removed ("the", "is", etc.).
+3. An inverted index maps each token → items that contain it.
     
     Example: "apple" → items [0, 3].
-3. When you search:
+4. When you search:
     - The query is tokenized.
     - Candidate items are retrieved from the inverted index.
     - Each candidate is scored with Jaccard similarity:
     
         score = ∣A∪B∣/∣A∩B∣​
-4. Results are sorted by score and returned.
+5. Results are sorted by score and returned.
 
 ## Example with Custom Objects
 ```js

@@ -36,6 +36,31 @@ function jaccard(a: Set<string>, b: Set<string>): number {
   return union === 0 ? 0 : inter / union;
 }
 
+export const defaultStopWords = [
+  "a","about","above","after","again","against","all","am","an","and","any","are","aren't","as","at",
+  "be","because","been","before","being","below","between","both","but","by",
+  "can't","cannot","could","couldn't",
+  "did","didn't","do","does","doesn't","doing","don't","down","during",
+  "each",
+  "few","for","from","further",
+  "had","hadn't","has","hasn't","have","haven't","having","he","he'd","he'll","he's",
+  "her","here","here's","hers","herself","him","himself","his","how","how's",
+  "i","i'd","i'll","i'm","i've","if","in","into","is","isn't","it","it's","its","itself",
+  "let's",
+  "me","more","most","mustn't","my","myself",
+  "no","nor","not",
+  "of","off","on","once","only","or","other","ought","our","ours","ourselves","out","over","own",
+  "same","shan't","she","she'd","she'll","she's","should","shouldn't","so","some","such",
+  "than","that","that's","the","their","theirs","them","themselves","then","there","there's","these",
+  "they","they'd","they'll","they're","they've","this","those","through","to","too",
+  "under","until","up",
+  "very",
+  "was","wasn't","we","we'd","we'll","we're","we've","were","weren't","what","what's",
+  "when","when's","where","where's","which","while","who","who's","whom","why","why's",
+  "with","won't","would","wouldn't",
+  "you","you'd","you'll","you're","you've","your","yours","yourself","yourselves"
+];
+
 export class JaccardSuggester<T extends Item = Item> {
   private tokenizer: Tokenizer;
   private stopWords: Set<string>;
@@ -48,7 +73,7 @@ export class JaccardSuggester<T extends Item = Item> {
 
   constructor(data: (string | T)[] = [], opts: Options<T> = {}) {
     this.tokenizer = opts.tokenizer ?? defaultTokenizer;
-    this.stopWords = opts.stopWords ?? new Set();
+    this.stopWords = opts.stopWords ?? new Set(defaultStopWords);
     this.minScore = opts.minScore ?? 0;
     this.topK = opts.topK ?? 5;
     for (const d of data) this.add(d);
@@ -83,7 +108,9 @@ export class JaccardSuggester<T extends Item = Item> {
     if (idx === -1) return false;
     // lazy delete (mark empty); keeps indexes stable
     const toks = this.tokens[idx];
-    for (const t of toks) this.inverted.get(t)?.delete(idx);
+    if (toks) {
+      for (const t of toks) this.inverted.get(t)?.delete(idx);
+    }
     this.items[idx] = { id: id, text: "", meta: undefined } as T;
     this.tokens[idx] = new Set();
     return true;
@@ -93,7 +120,9 @@ export class JaccardSuggester<T extends Item = Item> {
     const idx = this.items.findIndex((i) => i.id === id);
     if (idx === -1) return false;
     // remove old tokens
-    for (const t of this.tokens[idx]) this.inverted.get(t)?.delete(idx);
+    if (this.tokens[idx]) {
+      for (const t of this.tokens[idx]) this.inverted.get(t)?.delete(idx);
+    }
     // add new tokens
     const toks = new Set(this.tokenize(text));
     this.tokens[idx] = toks;
@@ -101,7 +130,9 @@ export class JaccardSuggester<T extends Item = Item> {
       if (!this.inverted.has(t)) this.inverted.set(t, new Set());
       this.inverted.get(t)!.add(idx);
     }
-    this.items[idx].text = text;
+    if(this.items[idx]) {
+      this.items[idx].text = text;
+    }
     return true;
   }
 
@@ -127,8 +158,10 @@ export class JaccardSuggester<T extends Item = Item> {
     // score candidates
     const results: SuggestResult<T>[] = [];
     for (const i of candIdxs) {
-      const score = jaccard(qTokens, this.tokens[i]);
-      if (score >= minScore) results.push({ item: this.items[i], score });
+      if (this.tokens[i]) {
+        const score = jaccard(qTokens, this.tokens[i]);
+        if (score >= minScore && this.items[i]) results.push({ item: this.items[i], score });
+      }
     }
     results.sort((a, b) => b.score - a.score);
     return results.slice(0, topK);
