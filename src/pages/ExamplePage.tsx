@@ -62,7 +62,7 @@ export default function JaccardShowcase() {
         lineHeight: 1.5,
       }}
     >
-      <h1>📘 Jaccard Suggester Showcase</h1>
+      <h1 style={{textAlign: 'center'}}>Jaccard Similarity Demo</h1>
       <p>
         This page demonstrates both a <strong>basic usage example</strong> and a
         more <strong>interactive playground</strong> for exploring{" "}
