@@ -3,6 +3,8 @@
 Fast **Jaccard-similarity based auto-suggestion** for JavaScript & TypeScript.  
 Useful for **search**, **autocomplete**, **spell-check**, or **fuzzy matching** tasks.
 
+**Live Demo:** [https://akshay2002singh.github.io/jaccard-similarity/](https://akshay2002singh.github.io/jaccard-similarity/)
+
 ---
 
 ## ✨ Features
